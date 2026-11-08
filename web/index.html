@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A.L.P.H.A. // Neural Academic & Computation HUD</title>
+  <style>
+    :root {
+      --bg-deep: #02040a;
+      --bg-hud: rgba(10, 16, 30, 0.78);
+      --border-glow: rgba(0, 240, 255, 0.28);
+      --cyan: #00f0ff;
+      --violet: #a855f7;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --danger: #f43f5e;
+      --text-main: #f1f5f9;
+      --text-dim: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body {
+      background: var(--bg-deep);
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 45%),
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* PANIC JEE DECOY */
+    .jee-decoy {
+      display: none; position: fixed; inset: 0; background: #fff; color: #0f172a;
+      z-index: 99999; padding: 32px; overflow-y: auto;
+    }
+    .jee-decoy h1 { font-size: 20px; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; margin-bottom: 16px; }
+    .jee-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+
+    /* TOP FUTURISTIC HUD BAR */
+    .hud-header {
+      height: 62px; padding: 0 22px; display: flex; justify-content: space-between; align-items: center;
+      background: rgba(5, 9, 20, 0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-glow); z-index: 10;
+    }
+    .brand-cluster { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+    .arc-core {
+      width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 16px var(--cyan), inset 0 0 10px var(--cyan);
+      animation: pulseCore 2.8s infinite ease-in-out;
+    }
+    .arc-inner { width: 12px; height: 12px; border-radius: 50%; background: var(--cyan); }
+    @keyframes pulseCore {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 14px var(--cyan); }
+      50% { transform: scale(1.08); box-shadow: 0 0 26px var(--violet); border-color: var(--violet); }
+    }
+    .brand-title {
+      font-size: 18px; font-weight: 900; letter-spacing: 3px;
+      background: linear-gradient(90deg, var(--cyan), #818cf8, var(--pink));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hud-badges { display: flex; align-items: center; gap: 10px; }
+    .status-chip {
+      font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 20px;
+      background: rgba(0, 240, 255, 0.08); border: 1px solid var(--border-glow); color: var(--cyan);
+      letter-spacing: 1px;
+    }
+    .panic-btn {
+      font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px;
+      background: rgba(244, 63, 94, 0.16); border: 1px solid var(--danger); color: #fda4af; cursor: pointer;
+    }
+
+    /* MAIN AI WORKSPACE */
+    .workspace {
+      flex: 1; display: flex; flex-direction: column; max-width: 920px; width: 100%;
+      margin: 0 auto; padding: 18px; overflow: hidden;
+    }
+    .ai-stream {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
+      padding: 12px; scrollbar-width: thin;
+    }
+    .ai-card {
+      max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 14.5px; line-height: 1.6;
+      backdrop-filter: blur(12px); white-space: pre-wrap; animation: fadeUp 0.25s ease;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .ai-card.user {
+      align-self: flex-end; background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(236, 72, 153, 0.25));
+      border: 1px solid rgba(236, 72, 153, 0.4); border-bottom-right-radius: 4px;
+    }
+    .ai-card.bot {
+      align-self: flex-start; background: var(--bg-hud);
+      border: 1px solid var(--border-glow); border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+    .ai-tag { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: var(--cyan); margin-bottom: 5px; display: block; }
+
+    .input-dock {
+      display: flex; gap: 10px; padding: 12px; border-radius: 16px;
+      background: var(--bg-hud); border: 1px solid var(--border-glow);
+      backdrop-filter: blur(16px); box-shadow: 0 0 30px rgba(0, 240, 255, 0.08);
+    }
+    .hud-input {
+      flex: 1; background: transparent; border: none; color: var(--text-main);
+      font-size: 14.5px; outline: none; padding: 4px 8px;
+    }
+    .hud-send {
+      padding: 10px 22px; border-radius: 12px; border: none; font-weight: 800; font-size: 13px;
+      letter-spacing: 1px; cursor: pointer; color: #02040a;
+      background: linear-gradient(90deg, var(--cyan), #818cf8);
+    }
+
+    /* SECRET QUANTUM CALL OVERLAY (HIDDEN UNTIL TRIGGERED) */
+    .call-hud {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(2, 4, 12, 0.94); backdrop-filter: blur(22px);
+      flex-direction: column; justify-content: space-between; padding: 20px;
+    }
+    .call-top {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 18px; border-radius: 14px; background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(236, 72, 153, 0.35);
+    }
+    .room-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .freq-input {
+      padding: 8px 12px; border-radius: 10px; border: 1px solid var(--pink);
+      background: rgba(0, 0, 0, 0.6); color: #fff; font-size: 13px; outline: none; width: 170px;
+    }
+    .btn-connect {
+      padding: 8px 16px; border-radius: 10px; border: none; font-weight: 800; font-size: 12px;
+      background: linear-gradient(90deg, #db2777, #ec4899); color: #fff; cursor: pointer;
+    }
+    .video-stage {
+      flex: 1; position: relative; margin: 16px 0; border-radius: 22px; overflow: hidden;
+      background: radial-gradient(circle at center, #111827 0%, #02040a 100%);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.1);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
+    .remote-placeholder {
+      position: absolute; text-align: center; pointer-events: none;
+    }
+    .radar-ring {
+      width: 96px; height: 96px; border-radius: 50%; border: 2px solid var(--pink);
+      margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 28px; box-shadow: 0 0 30px rgba(236, 72, 153, 0.4);
+      animation: pulseCore 2s infinite;
+    }
+    .pip-wrap {
+      position: absolute; bottom: 18px; right: 18px; width: 160px; height: 210px;
+      border-radius: 16px; overflow: hidden; border: 2px solid var(--cyan);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8); background: #000;
+    }
+    #localVideo { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+
+    .call-dock {
+      display: flex; justify-content: center; gap: 16px; padding: 12px;
+    }
+    .ctrl-orb {
+      width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(15, 23, 42, 0.85); color: #fff; font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: 0.2s;
+    }
+    .ctrl-orb:hover { transform: scale(1.08); border-color: var(--cyan); }
+    .ctrl-orb.off { background: rgba(244, 63, 94, 0.28); border-color: var(--danger); color: #fda4af; }
+    .ctrl-orb.end { background: #e11d48; border-color: #fb7185; width: 62px; border-radius: 26px; }
+
+    @media (max-width: 640px) {
+      .pip-wrap { width: 110px; height: 150px; bottom: 12px; right: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- JEE STUDY CAMOUFLAGE (PANIC LOCK ON ESC) -->
+  <div class="jee-decoy" id="jeeDecoy">
+    <h1>JEE Advanced Physics — Electrostatics & Gauss's Law Revision</h1>
+    <div class="jee-box">
+      <strong>1. Coulomb's Law & Electric Field:</strong><br>
+      F = (1 / 4πε₀) · (q₁q₂ / r²) | Electric Field due to point charge: E = kQ / r²
+    </div>
+    <div class="jee-box">
+      <strong>2. Gauss's Theorem:</strong><br>
+      ∮ E · dA = q_enclosed / ε₀ | Infinite line charge: E = λ / (2πε₀r)
+    </div>
+    <button onclick="exitDecoy()" style="margin-top:16px;padding:8px 14px;border:none;border-radius:6px;background:#e2e8f0;color:#475569;cursor:pointer;">Reload Module</button>
+  </div>
+
+  <!-- FUTURISTIC TOP HUD -->
+  <header class="hud-header">
+    <div class="brand-cluster" ondblclick="openSecretCall()" title="Double-click Core for Quantum Link">
+      <div class="arc-core"><div class="arc-inner"></div></div>
+      <div>
+        <div class="brand-title">A.L.P.H.A.</div>
+        <div style="font-size:10px;color:var(--text-dim);letter-spacing:1.5px;">NEURAL COMPUTATION CORE v4.2</div>
+      </div>
+    </div>
+
+    <div class="hud-badges">
+      <span class="status-chip">CORE ONLINE</span>
+      <button class="panic-btn" onclick="triggerPanic()">🔒 ESC</button>
+    </div>
+  </header>
+
+  <!-- SURFACE LAYER: FUTURISTIC AI LAB -->
+  <main class="workspace">
+    <div class="ai-stream" id="aiStream">
+      <div class="ai-card bot">
+        <span class="ai-tag">⚡ A.L.P.H.A. NEURAL ENGINE</span>
+        System initialized. Ask any Physics, Mathematics, or Python architecture query.
+      </div>
+    </div>
+
+    <div class="input-dock">
+      <input class="hud-input" id="aiPrompt" placeholder="Enter computation query..." onkeydown="if(event.key==='Enter')askAlpha()" />
+      <button class="hud-send" onclick="askAlpha()">EXECUTE</button>
+    </div>
+  </main>
+
+  <!-- SECRET QUANTUM VIDEO & VOICE CALL HUD -->
+  <section class="call-hud" id="callHud">
+    <div class="call-top">
+      <div class="room-controls">
+        <span style="color:#f472b6;font-weight:900;font-size:13px;letter-spacing:1px;">◈ QUANTUM P2P LINK</span>
+        <input class="freq-input" id="roomCode" value="mayank-janvi-77" placeholder="Secret Room Key" />
+        <button class="btn-connect" onclick="startQuantumCall(true)">📹 VIDEO</button>
+        <button class="btn-connect" style="background:linear-gradient(90deg,#0284c7,#06b6d4);" onclick="startQuantumCall(false)">📞 VOICE</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="callStatus" style="font-size:12px;color:var(--cyan);font-weight:700;">STANDBY</span>
+        <button class="panic-btn" onclick="triggerPanic()">🔒 HIDE (ESC)</button>
+      </div>
+    </div>
+
+    <div class="video-stage">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <div class="remote-placeholder" id="remotePlaceholder">
+        <div class="radar-ring">📡</div>
+        <div style="font-weight:800;font-size:15px;color:#fbcfe8;" id="radarText">Select Video or Voice to Open Encrypted Channel</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">Zero-Log WebRTC Peer-to-Peer Stream</div>
+      </div>
+
+      <div class="pip-wrap">
+        <video id="localVideo" autoplay muted playsinline></video>
+      </div>
+    </div>
+
+    <div class="call-dock">
+      <button class="ctrl-orb" id="btnMic" onclick="toggleMic()" title="Mute/Unmute">🎙️</button>
+      <button class="ctrl-orb" id="btnCam" onclick="toggleCam()" title="Camera On/Off">📷</button>
+      <button class="ctrl-orb end" onclick="endQuantumCall(true)" title="End & Close">📵</button>
+    </div>
+  </section>
+
+  <script>
+    let localStream = null;
+    let peerConn = null;
+    let sigWs = null;
+    let micEnabled = true;
+    let camEnabled = true;
+
+    const rtcConfig = {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" }
+      ]
+    };
+
+    // PANIC LOCK ON ESCAPE KEY
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") triggerPanic();
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "v") openSecretCall();
+    });
+
+    function triggerPanic() {
+      endQuantumCall(false);
+      document.getElementById("callHud").style.display = "none";
+      document.getElementById("jeeDecoy").style.display = "block";
+    }
+
+    function exitDecoy() {
+      document.getElementById("jeeDecoy").style.display = "none";
+    }
+
+    function openSecretCall() {
+      document.getElementById("callHud").style.display = "flex";
+    }
+
+    // AUTO-OPEN SECRET CALL IF EMBEDDED FROM F.R.I.D.A.Y. WITH ?quantum=1
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("quantum") === "1") {
+      if (urlParams.get("room")) {
+        document.getElementById("roomCode").value = urlParams.get("room");
+      }
+      openSecretCall();
+    }
+
+    async function askAlpha() {
+      const inp = document.getElementById("aiPrompt");
+      const q = inp.value.trim();
+      if (!q) return;
+
+      // Secret text command inside AI box also opens call!
+      if (q.toLowerCase() === "/quantum" || q.toLowerCase() === "/call") {
+        inp.value = "";
+        openSecretCall();
+        return;
+      }
+
+      inp.value = "";
+      appendCard("user", "YOU", q);
+      const loadingId = "load-" + Date.now();
+      appendCard("bot", "⚡ A.L.P.H.A.", "Computing...", loadingId);
+
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: q })
+        });
+        const data = await res.json();
+        document.getElementById(loadingId).innerHTML = `<span class="ai-tag">⚡ A.L.P.H.A. NEURAL ENGINE</span>${escapeHtml(data.reply)}`;
+      } catch (e) {
+        document.getElementById(loadingId).textContent = "Connection error.";
+      }
+    }
+
+    function appendCard(cls, tag, text, id = "") {
+      const stream = document.getElementById("aiStream");
+      const div = document.createElement("div");
+      div.className = "ai-card " + cls;
+      if (id) div.id = id;
+      div.innerHTML = `<span class="ai-tag">${tag}</span>${escapeHtml(text)}`;
+      stream.appendChild(div);
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    async function startQuantumCall(withVideo) {
+      const room = document.getElementById("roomCode").value.trim() || "mayank-janvi-77";
+      document.getElementById("callStatus").textContent = "INITIALIZING MEDIA...";
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
+        document.getElementById("localVideo").srcObject = localStream;
+        camEnabled = withVideo;
+        micEnabled = true;
+        document.getElementById("btnCam").classList.toggle("off", !withVideo);
+        document.getElementById("btnMic").classList.remove("off");
+      } catch (err) {
+        document.getElementById("callStatus").textContent = "MIC/CAM PERMISSION DENIED";
+        return;
+      }
+
+      const proto = location.protocol === "https:" ? "wss:" : "ws:";
+      if (sigWs) sigWs.close();
+      sigWs = new WebSocket(`${proto}//${location.host}/ws/call/${encodeURIComponent(room)}`);
+
+      sigWs.onopen = () => {
+        document.getElementById("callStatus").textContent = "WAITING FOR PARTNER...";
+        document.getElementById("radarText").textContent = `Frequency [${room}] Active — Waiting for Partner to Join...`;
+      };
+
+      sigWs.onmessage = async (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === "peer_joined") {
+          await setupPeerConnection();
+          const offer = await peerConn.createOffer();
+          await peerConn.setLocalDescription(offer);
+          sigWs.send(JSON.stringify({ type: "offer", sdp: offer }));
+        } else if (msg.type === "offer") {
+          await setupPeerConnection();
+          await peerConn.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+          const answer = await peerConn.createAnswer();
+          await peerConn.setLocalDescription(answer);
+          sigWs.send(JSON.stringify({ type: "answer", sdp: answer }));
+        } else if (msg.type === "answer") {
+          if (peerConn) {
+            await peerConn.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+          }
+        } else if (msg.type === "ice") {
+          if (peerConn && msg.candidate) {
+            try { await peerConn.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch (e) {}
+          }
+        } else if (msg.type === "peer_left") {
+          document.getElementById("callStatus").textContent = "PARTNER DISCONNECTED";
+          document.getElementById("remotePlaceholder").style.display = "block";
+          document.getElementById("radarText").textContent = "Partner left the frequency.";
+        }
+      };
+    }
+
+    async function setupPeerConnection() {
+      if (peerConn) peerConn.close();
+      peerConn = new RTCPeerConnection(rtcConfig);
+
+      localStream.getTracks().forEach(track => peerConn.addTrack(track, localStream));
+
+      peerConn.ontrack = (event) => {
+        document.getElementById("remoteVideo").srcObject = event.streams[0];
+        document.getElementById("remotePlaceholder").style.display = "none";
+        document.getElementById("callStatus").textContent = "🔒 ENCRYPTED LIVE";
+      };
+
+      peerConn.onicecandidate = (event) => {
+        if (event.candidate && sigWs && sigWs.readyState === WebSocket.OPEN) {
+          sigWs.send(JSON.stringify({ type: "ice", candidate: event.candidate }));
+        }
+      };
+    }
+
+    function toggleMic() {
+      if (!localStream) return;
+      micEnabled = !micEnabled;
+      localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
+      document.getElementById("btnMic").classList.toggle("off", !micEnabled);
+    }
+
+    function toggleCam() {
+      if (!localStream) return;
+      camEnabled = !camEnabled;
+      localStream.getVideoTracks().forEach(t => t.enabled = camEnabled);
+      document.getElementById("btnCam").classList.toggle("off", !camEnabled);
+    }
+
+    function endQuantumCall(closeHud) {
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      if (peerConn) {
+        peerConn.close();
+        peerConn = null;
+      }
+      if (sigWs) {
+        sigWs.close();
+        sigWs = null;
+      }
+      document.getElementById("remoteVideo").srcObject = null;
+      document.getElementById("localVideo").srcObject = null;
+      document.getElementById("remotePlaceholder").style.display = "block";
+      document.getElementById("callStatus").textContent = "STANDBY";
+      if (closeHud) document.getElementById("callHud").style.display = "none";
+    }
+  </script>
+</body>
+</html>
