@@ -1,16 +1,15 @@
 import os
-import json
 from typing import Dict, List
 from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel
 from groq import Groq
 
 load_dotenv()
 
-app = FastAPI(title="A.L.P.H.A. // Neural & P2P Core", version="1.0.0")
+app = FastAPI(title="A.L.P.H.A. // Neural & P2P Core", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,7 +42,6 @@ class RoomManager:
         if room_id not in self.rooms:
             self.rooms[room_id] = []
         self.rooms[room_id].append(ws)
-        # Notify existing peer that second peer arrived
         if len(self.rooms[room_id]) > 1:
             for peer in self.rooms[room_id]:
                 if peer != ws:
@@ -74,6 +72,44 @@ async def home():
         return HTMLResponse("<h3>A.L.P.H.A. Core Online</h3>")
     with open(idx, "r", encoding="utf-8") as f:
         return HTMLResponse(f.read())
+
+
+@app.get("/alpha_logo.svg")
+async def alpha_logo():
+    svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+      <rect width="256" height="256" rx="56" fill="#02060d"/>
+      <circle cx="128" cy="128" r="96" fill="none" stroke="#00f0ff" stroke-width="8" stroke-dasharray="28 12"/>
+      <circle cx="128" cy="128" r="68" fill="none" stroke="#ff1e7a" stroke-width="6" stroke-dasharray="16 14"/>
+      <circle cx="128" cy="128" r="34" fill="#00f0ff" fill-opacity="0.25" stroke="#00f0ff" stroke-width="5"/>
+      <text x="128" y="139" font-family="Consolas, monospace" font-size="34" font-weight="bold" fill="#ffffff" text-anchor="middle">A</text>
+    </svg>"""
+    return Response(content=svg, media_type="image/svg+xml")
+
+
+@app.get("/manifest.json")
+async def manifest():
+    return JSONResponse({
+        "name": "QuantumLab Physics HUD",
+        "short_name": "QuantumLab",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#02060d",
+        "theme_color": "#00f0ff",
+        "icons": [
+            {
+                "src": "/alpha_logo.svg",
+                "sizes": "any",
+                "type": "image/svg+xml",
+                "purpose": "any maskable"
+            }
+        ]
+    })
+
+
+@app.get("/sw.js")
+async def service_worker():
+    js = "self.addEventListener('fetch', function(event) {});"
+    return Response(content=js, media_type="application/javascript")
 
 
 @app.get("/ping")
