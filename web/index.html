@@ -3,176 +3,203 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A.L.P.H.A. // Neural Academic & Computation HUD</title>
+  <title>A.L.P.H.A. // Neural Computation & Quantum HUD</title>
   <style>
     :root {
-      --bg-deep: #02040a;
-      --bg-hud: rgba(10, 16, 30, 0.78);
-      --border-glow: rgba(0, 240, 255, 0.28);
+      --bg-void: #02060d;
+      --panel-bg: rgba(4, 14, 26, 0.84);
       --cyan: #00f0ff;
-      --violet: #a855f7;
-      --pink: #ec4899;
-      --emerald: #10b981;
-      --danger: #f43f5e;
-      --text-main: #f1f5f9;
-      --text-dim: #64748b;
+      --cyan-dim: rgba(0, 240, 255, 0.22);
+      --pink: #ff1e7a;
+      --pink-dim: rgba(255, 30, 122, 0.25);
+      --text-main: #d8f8ff;
+      --text-dim: #5c8a9e;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Consolas', 'Courier New', monospace; }
     body {
-      background: var(--bg-deep);
+      background: var(--bg-void);
       background-image:
-        radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 45%),
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+        radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.07) 0%, transparent 70%),
+        linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
       color: var(--text-main);
       height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      padding: 10px;
+      gap: 10px;
     }
 
     /* PANIC JEE DECOY */
     .jee-decoy {
       display: none; position: fixed; inset: 0; background: #fff; color: #0f172a;
-      z-index: 99999; padding: 32px; overflow-y: auto;
+      z-index: 99999; padding: 32px; overflow-y: auto; font-family: system-ui, sans-serif;
     }
     .jee-decoy h1 { font-size: 20px; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; margin-bottom: 16px; }
     .jee-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
 
-    /* TOP FUTURISTIC HUD BAR */
-    .hud-header {
-      height: 62px; padding: 0 22px; display: flex; justify-content: space-between; align-items: center;
-      background: rgba(5, 9, 20, 0.85); backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border-glow); z-index: 10;
+    /* HUD FRAME CORNERS */
+    .hud-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--cyan-dim);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.08), inset 0 0 18px rgba(0, 240, 255, 0.04);
+      position: relative;
+      backdrop-filter: blur(10px);
     }
-    .brand-cluster { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
-    .arc-core {
-      width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--cyan);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 16px var(--cyan), inset 0 0 10px var(--cyan);
-      animation: pulseCore 2.8s infinite ease-in-out;
+    .hud-box::before, .hud-box::after {
+      content: ""; position: absolute; width: 12px; height: 12px; border: 2px solid var(--cyan); pointer-events: none;
     }
-    .arc-inner { width: 12px; height: 12px; border-radius: 50%; background: var(--cyan); }
-    @keyframes pulseCore {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 14px var(--cyan); }
-      50% { transform: scale(1.08); box-shadow: 0 0 26px var(--violet); border-color: var(--violet); }
+    .hud-box::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .hud-box::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    /* TOP TELEMETRY BAR */
+    .top-bar {
+      height: 68px; display: flex; justify-content: space-between; align-items: center; padding: 0 18px;
     }
-    .brand-title {
-      font-size: 18px; font-weight: 900; letter-spacing: 3px;
-      background: linear-gradient(90deg, var(--cyan), #818cf8, var(--pink));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    .logo-cluster { display: flex; align-items: center; gap: 16px; }
+    .reactor-svg { width: 52px; height: 52px; animation: spinSlow 14s linear infinite; }
+    @keyframes spinSlow { 100% { transform: rotate(360deg); } }
+    @keyframes spinRev { 100% { transform: rotate(-360deg); } }
+    .alpha-banner {
+      border: 1px solid var(--cyan); padding: 4px 16px; background: rgba(0, 240, 255, 0.08);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
     }
-    .hud-badges { display: flex; align-items: center; gap: 10px; }
-    .status-chip {
-      font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 20px;
-      background: rgba(0, 240, 255, 0.08); border: 1px solid var(--border-glow); color: var(--cyan);
-      letter-spacing: 1px;
+    .alpha-banner h1 { font-size: 24px; letter-spacing: 6px; color: #fff; text-shadow: 0 0 10px var(--cyan); }
+    .top-metrics { display: flex; align-items: center; gap: 14px; }
+    .metric-pill {
+      border: 1px solid var(--cyan-dim); padding: 6px 12px; text-align: center; font-size: 11px;
     }
-    .panic-btn {
-      font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px;
-      background: rgba(244, 63, 94, 0.16); border: 1px solid var(--danger); color: #fda4af; cursor: pointer;
+    .metric-pill strong { display: block; font-size: 14px; color: var(--cyan); }
+    .panic-trigger {
+      background: rgba(255, 30, 122, 0.18); border: 1px solid var(--pink); color: #ff8ab8;
+      padding: 8px 14px; font-weight: bold; cursor: pointer; font-size: 12px; letter-spacing: 1px;
     }
 
-    /* MAIN AI WORKSPACE */
-    .workspace {
-      flex: 1; display: flex; flex-direction: column; max-width: 920px; width: 100%;
-      margin: 0 auto; padding: 18px; overflow: hidden;
-    }
-    .ai-stream {
-      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
-      padding: 12px; scrollbar-width: thin;
-    }
-    .ai-card {
-      max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 14.5px; line-height: 1.6;
-      backdrop-filter: blur(12px); white-space: pre-wrap; animation: fadeUp 0.25s ease;
-    }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .ai-card.user {
-      align-self: flex-end; background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(236, 72, 153, 0.25));
-      border: 1px solid rgba(236, 72, 153, 0.4); border-bottom-right-radius: 4px;
-    }
-    .ai-card.bot {
-      align-self: flex-start; background: var(--bg-hud);
-      border: 1px solid var(--border-glow); border-bottom-left-radius: 4px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-    }
-    .ai-tag { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: var(--cyan); margin-bottom: 5px; display: block; }
-
-    .input-dock {
-      display: flex; gap: 10px; padding: 12px; border-radius: 16px;
-      background: var(--bg-hud); border: 1px solid var(--border-glow);
-      backdrop-filter: blur(16px); box-shadow: 0 0 30px rgba(0, 240, 255, 0.08);
-    }
-    .hud-input {
-      flex: 1; background: transparent; border: none; color: var(--text-main);
-      font-size: 14.5px; outline: none; padding: 4px 8px;
-    }
-    .hud-send {
-      padding: 10px 22px; border-radius: 12px; border: none; font-weight: 800; font-size: 13px;
-      letter-spacing: 1px; cursor: pointer; color: #02040a;
-      background: linear-gradient(90deg, var(--cyan), #818cf8);
+    /* 3-COLUMN IRON-MAN HUD GRID */
+    .hud-grid {
+      flex: 1; display: grid; grid-template-columns: 260px 1fr 370px; gap: 10px; overflow: hidden;
     }
 
-    /* SECRET QUANTUM CALL OVERLAY (HIDDEN UNTIL TRIGGERED) */
-    .call-hud {
-      display: none; position: fixed; inset: 0; z-index: 500;
-      background: rgba(2, 4, 12, 0.94); backdrop-filter: blur(22px);
-      flex-direction: column; justify-content: space-between; padding: 20px;
+    /* LEFT TELEMETRY COLUMN */
+    .col-left { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+    .sub-header {
+      font-size: 11px; letter-spacing: 2px; color: var(--cyan); border-bottom: 1px solid var(--cyan-dim);
+      padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between;
     }
-    .call-top {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 18px; border-radius: 14px; background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(236, 72, 153, 0.35);
+    .gauge-row { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
+    .circle-gauge {
+      width: 84px; height: 84px; border-radius: 50%; border: 2px dashed var(--cyan);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.2); position: relative;
     }
-    .room-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .freq-input {
-      padding: 8px 12px; border-radius: 10px; border: 1px solid var(--pink);
-      background: rgba(0, 0, 0, 0.6); color: #fff; font-size: 13px; outline: none; width: 170px;
+    .circle-gauge span { font-size: 15px; font-weight: bold; color: #fff; }
+    .circle-gauge small { font-size: 9px; color: var(--text-dim); }
+    .hex-log {
+      flex: 1; font-size: 10px; color: #38bdf8; line-height: 1.5; overflow: hidden; opacity: 0.85;
+      background: rgba(0, 10, 20, 0.6); padding: 8px; border: 1px solid rgba(0, 240, 255, 0.12);
     }
-    .btn-connect {
-      padding: 8px 16px; border-radius: 10px; border: none; font-weight: 800; font-size: 12px;
-      background: linear-gradient(90deg, #db2777, #ec4899); color: #fff; cursor: pointer;
+
+    /* CENTER AI COMPUTATION CONSOLE */
+    .col-center { display: flex; flex-direction: column; padding: 12px; gap: 10px; overflow: hidden; }
+    .chat-console {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+      padding: 10px; background: rgba(1, 8, 16, 0.75); border: 1px solid var(--cyan-dim);
     }
-    .video-stage {
-      flex: 1; position: relative; margin: 16px 0; border-radius: 22px; overflow: hidden;
-      background: radial-gradient(circle at center, #111827 0%, #02040a 100%);
-      border: 1px solid rgba(0, 240, 255, 0.25);
-      box-shadow: 0 0 50px rgba(0, 240, 255, 0.1);
-      display: flex; align-items: center; justify-content: center;
+    .msg-node {
+      max-width: 85%; padding: 10px 14px; font-size: 13px; line-height: 1.55; white-space: pre-wrap;
+    }
+    .msg-node.bot {
+      align-self: flex-start; border-left: 3px solid var(--cyan);
+      background: rgba(0, 240, 255, 0.07); color: #e0faff;
+    }
+    .msg-node.user {
+      align-self: flex-end; border-right: 3px solid var(--pink);
+      background: rgba(255, 30, 122, 0.14); color: #ffe4f0;
+    }
+    .msg-meta { font-size: 10px; color: var(--cyan); margin-bottom: 4px; letter-spacing: 1px; }
+
+    /* DATA TRANSMISSION & PINK PROGRESS BARS */
+    .telemetry-bars { padding: 8px 10px; background: rgba(0, 12, 24, 0.7); border: 1px solid var(--cyan-dim); }
+    .prog-label { font-size: 10px; color: var(--pink); letter-spacing: 1.5px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .prog-track { height: 8px; background: rgba(255, 30, 122, 0.15); border: 1px solid var(--pink); margin-bottom: 8px; overflow: hidden; }
+    .prog-fill {
+      height: 100%; width: 72%; background: linear-gradient(90deg, var(--pink), #ff7eb3);
+      box-shadow: 0 0 12px var(--pink); animation: pulseBar 2.5s infinite alternate;
+    }
+    @keyframes pulseBar { 0% { width: 48%; } 100% { width: 92%; } }
+
+    .console-input-row { display: flex; gap: 8px; }
+    .console-input {
+      flex: 1; background: rgba(0, 18, 34, 0.9); border: 1px solid var(--cyan); color: #fff;
+      padding: 10px 12px; font-size: 13px; outline: none;
+    }
+    .console-btn {
+      background: var(--cyan); color: #02060d; border: none; padding: 0 20px; font-weight: 900;
+      cursor: pointer; letter-spacing: 1px;
+    }
+
+    /* RIGHT P2P ENCRYPTED VIDEO CALL HUD */
+    .col-right { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+    .video-window {
+      height: 270px; border: 1px solid var(--cyan); background: #01050a; position: relative;
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
     }
     #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
-    .remote-placeholder {
-      position: absolute; text-align: center; pointer-events: none;
+    .holo-overlay {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; pointer-events: none;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 75%);
     }
-    .radar-ring {
-      width: 96px; height: 96px; border-radius: 50%; border: 2px solid var(--pink);
-      margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
-      font-size: 28px; box-shadow: 0 0 30px rgba(236, 72, 153, 0.4);
-      animation: pulseCore 2s infinite;
+    .holo-reticle {
+      width: 118px; height: 118px; border-radius: 50%; border: 2px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center; font-size: 34px;
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.35), inset 0 0 20px rgba(0, 240, 255, 0.25);
+      animation: spinSlow 10s linear infinite;
     }
-    .pip-wrap {
-      position: absolute; bottom: 18px; right: 18px; width: 160px; height: 210px;
-      border-radius: 16px; overflow: hidden; border: 2px solid var(--cyan);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8); background: #000;
+    .secure-badge {
+      margin-top: 10px; font-size: 10px; padding: 3px 10px; border: 1px solid var(--cyan);
+      background: rgba(0, 240, 255, 0.12); color: var(--cyan); letter-spacing: 1.5px;
     }
-    #localVideo { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    #localVideo {
+      position: absolute; bottom: 8px; right: 8px; width: 88px; height: 115px;
+      border: 1px solid var(--pink); object-fit: cover; background: #000; transform: scaleX(-1);
+    }
 
-    .call-dock {
-      display: flex; justify-content: center; gap: 16px; padding: 12px;
+    /* AUDIO EQUALIZER & CALL CONTROLS */
+    .eq-strip {
+      display: flex; align-items: center; justify-content: center; gap: 4px; height: 34px;
+      background: rgba(0, 15, 28, 0.8); border: 1px solid var(--cyan-dim); padding: 4px;
     }
-    .ctrl-orb {
-      width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(15, 23, 42, 0.85); color: #fff; font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; transition: 0.2s;
+    .eq-bar {
+      width: 3px; background: var(--cyan); animation: eqWave 0.9s infinite ease-in-out alternate;
     }
-    .ctrl-orb:hover { transform: scale(1.08); border-color: var(--cyan); }
-    .ctrl-orb.off { background: rgba(244, 63, 94, 0.28); border-color: var(--danger); color: #fda4af; }
-    .ctrl-orb.end { background: #e11d48; border-color: #fb7185; width: 62px; border-radius: 26px; }
+    @keyframes eqWave { 0% { height: 4px; } 100% { height: 24px; background: var(--pink); } }
 
-    @media (max-width: 640px) {
-      .pip-wrap { width: 110px; height: 150px; bottom: 12px; right: 12px; }
+    .p2p-controls { display: flex; flex-direction: column; gap: 8px; }
+    .room-row { display: flex; gap: 6px; }
+    .room-input {
+      flex: 1; background: rgba(0, 15, 28, 0.9); border: 1px solid var(--pink); color: #fff;
+      padding: 7px 10px; font-size: 12px; outline: none;
+    }
+    .call-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .hud-btn {
+      padding: 8px 4px; font-size: 11px; font-weight: bold; border: 1px solid var(--cyan);
+      background: rgba(0, 240, 255, 0.1); color: var(--cyan); cursor: pointer; text-align: center;
+    }
+    .hud-btn.pink { border-color: var(--pink); background: rgba(255, 30, 122, 0.2); color: #ff8ab8; }
+    .hud-btn.end { border-color: #f43f5e; background: #e11d48; color: #fff; }
+
+    /* NEURAL NODE GRAPH FOOTER */
+    .node-box {
+      flex: 1; border: 1px solid var(--cyan-dim); background: rgba(0, 10, 20, 0.6);
+      padding: 8px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+
+    @media (max-width: 980px) {
+      body { height: auto; overflow-y: auto; }
+      .hud-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -180,143 +207,168 @@
 
   <!-- JEE STUDY CAMOUFLAGE (PANIC LOCK ON ESC) -->
   <div class="jee-decoy" id="jeeDecoy">
-    <h1>JEE Advanced Physics — Electrostatics & Gauss's Law Revision</h1>
-    <div class="jee-box">
-      <strong>1. Coulomb's Law & Electric Field:</strong><br>
-      F = (1 / 4πε₀) · (q₁q₂ / r²) | Electric Field due to point charge: E = kQ / r²
-    </div>
-    <div class="jee-box">
-      <strong>2. Gauss's Theorem:</strong><br>
-      ∮ E · dA = q_enclosed / ε₀ | Infinite line charge: E = λ / (2πε₀r)
-    </div>
-    <button onclick="exitDecoy()" style="margin-top:16px;padding:8px 14px;border:none;border-radius:6px;background:#e2e8f0;color:#475569;cursor:pointer;">Reload Module</button>
+    <h1>JEE Class 11 Physics — Electrostatics & Rotational Mechanics Notes</h1>
+    <div class="jee-box"><strong>1. Gauss's Law:</strong> ∮ E · dA = q_in / ε₀</div>
+    <div class="jee-box"><strong>2. Moment of Inertia:</strong> Solid Sphere I = (2/5)MR² | Disc I = (1/2)MR²</div>
+    <button onclick="document.getElementById('jeeDecoy').style.display='none'" style="padding:8px 14px;cursor:pointer;">Reload Notes</button>
   </div>
 
-  <!-- FUTURISTIC TOP HUD -->
-  <header class="hud-header">
-    <div class="brand-cluster" ondblclick="openSecretCall()" title="Double-click Core for Quantum Link">
-      <div class="arc-core"><div class="arc-inner"></div></div>
-      <div>
-        <div class="brand-title">A.L.P.H.A.</div>
-        <div style="font-size:10px;color:var(--text-dim);letter-spacing:1.5px;">NEURAL COMPUTATION CORE v4.2</div>
+  <!-- TOP TELEMETRY HEADER -->
+  <header class="hud-box top-bar">
+    <div class="logo-cluster">
+      <svg class="reactor-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="14 6"/>
+        <circle cx="50" cy="50" r="32" fill="none" stroke="#ff1e7a" stroke-width="2" stroke-dasharray="8 8"/>
+        <circle cx="50" cy="50" r="14" fill="rgba(0,240,255,0.25)" stroke="#00f0ff" stroke-width="2"/>
+      </svg>
+      <div class="alpha-banner">
+        <h1>A.L.P.H.A.</h1>
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);line-height:1.4;">
+        SYSTEM TECHNICAL CORE<br>QUANTUM ENCRYPTION: ACTIVE
       </div>
     </div>
 
-    <div class="hud-badges">
-      <span class="status-chip">CORE ONLINE</span>
-      <button class="panic-btn" onclick="triggerPanic()">🔒 ESC</button>
+    <div class="top-metrics">
+      <div class="metric-pill"><span>NEURAL LOAD</span><strong>82%</strong></div>
+      <div class="metric-pill"><span>SYNC LINK</span><strong>99.4%</strong></div>
+      <div class="metric-pill"><span id="hudClock">00:00:00</span><strong style="color:var(--pink);">LIVE IST</strong></div>
+      <button class="panic-trigger" onclick="triggerPanic()">🔒 ESC HIDE</button>
     </div>
   </header>
 
-  <!-- SURFACE LAYER: FUTURISTIC AI LAB -->
-  <main class="workspace">
-    <div class="ai-stream" id="aiStream">
-      <div class="ai-card bot">
-        <span class="ai-tag">⚡ A.L.P.H.A. NEURAL ENGINE</span>
-        System initialized. Ask any Physics, Mathematics, or Python architecture query.
-      </div>
-    </div>
+  <!-- MAIN 3-COLUMN HUD -->
+  <div class="hud-grid">
 
-    <div class="input-dock">
-      <input class="hud-input" id="aiPrompt" placeholder="Enter computation query..." onkeydown="if(event.key==='Enter')askAlpha()" />
-      <button class="hud-send" onclick="askAlpha()">EXECUTE</button>
-    </div>
-  </main>
-
-  <!-- SECRET QUANTUM VIDEO & VOICE CALL HUD -->
-  <section class="call-hud" id="callHud">
-    <div class="call-top">
-      <div class="room-controls">
-        <span style="color:#f472b6;font-weight:900;font-size:13px;letter-spacing:1px;">◈ QUANTUM P2P LINK</span>
-        <input class="freq-input" id="roomCode" value="mayank-janvi-77" placeholder="Secret Room Key" />
-        <button class="btn-connect" onclick="startQuantumCall(true)">📹 VIDEO</button>
-        <button class="btn-connect" style="background:linear-gradient(90deg,#0284c7,#06b6d4);" onclick="startQuantumCall(false)">📞 VOICE</button>
+    <!-- LEFT COLUMN: TELEMETRY & HEX STREAM -->
+    <aside class="hud-box col-left">
+      <div class="sub-header"><span>CORE DIAGNOSTICS</span><span>v4.8</span></div>
+      <div class="gauge-row">
+        <div class="circle-gauge"><span id="upTimer">05:39</span><small>UPTIME</small></div>
+        <div class="circle-gauge" style="border-color:var(--pink);"><span>295</span><small>GFLOPS</small></div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span id="callStatus" style="font-size:12px;color:var(--cyan);font-weight:700;">STANDBY</span>
-        <button class="panic-btn" onclick="triggerPanic()">🔒 HIDE (ESC)</button>
+      <div class="sub-header"><span>DATA TRANSMISSION STREAM</span><span>HEX</span></div>
+      <div class="hex-log" id="hexLog">
+        0101001 0100101 0010111 0010000<br>
+        [SYS] NEURAL MATRIX INITIALIZED<br>
+        [NET] P2P STUN RELAY VERIFIED<br>
+        [SEC] AES-256 QUANTUM HANDSHAKE<br>
+        0110101 0101011 0001010 1101010<br>
+        [AI] GPT-OSS-120B CASCADE READY<br>
+        [HUD] HOLOGRAPHIC LAYER LOCKED<br>
+        1010011 0011101 0101100 0111011
       </div>
-    </div>
+    </aside>
 
-    <div class="video-stage">
-      <video id="remoteVideo" autoplay playsinline></video>
-      <div class="remote-placeholder" id="remotePlaceholder">
-        <div class="radar-ring">📡</div>
-        <div style="font-weight:800;font-size:15px;color:#fbcfe8;" id="radarText">Select Video or Voice to Open Encrypted Channel</div>
-        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">Zero-Log WebRTC Peer-to-Peer Stream</div>
+    <!-- CENTER COLUMN: AI COMPUTATION CHAT CONSOLE -->
+    <main class="hud-box col-center">
+      <div class="sub-header"><span>AI COMPUTATION CHAT CONSOLE</span><span style="color:var(--pink);">● ONLINE</span></div>
+      <div class="chat-console" id="aiStream">
+        <div class="msg-node bot">
+          <div class="msg-meta">[17:22:06] A.L.P.H.A. NEURAL CORE</div>
+          System online. Enter Physics, Mathematics, or Code computation query below.
+        </div>
       </div>
 
-      <div class="pip-wrap">
+      <div class="telemetry-bars">
+        <div class="prog-label"><span>PROCESSING COMPUTATIONS...</span><span>ACTIVE</span></div>
+        <div class="prog-track"><div class="prog-fill"></div></div>
+        <div class="prog-label"><span>QUANTUM NEURAL BANDWIDTH</span><span>OPTIMAL</span></div>
+        <div class="prog-track"><div class="prog-fill" style="animation-delay:0.8s;"></div></div>
+      </div>
+
+      <div class="console-input-row">
+        <input class="console-input" id="aiPrompt" placeholder="Execute neural query..." onkeydown="if(event.key==='Enter')askAlpha()" />
+        <button class="console-btn" onclick="askAlpha()">SEND</button>
+      </div>
+    </main>
+
+    <!-- RIGHT COLUMN: ENCRYPTED P2P VIDEO CALL HUD -->
+    <aside class="hud-box col-right">
+      <div class="sub-header"><span>ENCRYPTED P2P VIDEO CALL</span><span id="callStatus" style="color:var(--pink);">STANDBY</span></div>
+
+      <div class="video-window">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <div class="holo-overlay" id="holoOverlay">
+          <div class="holo-reticle">👤</div>
+          <div class="secure-badge" id="radarText">P2P SECURE • READY TO LINK</div>
+        </div>
         <video id="localVideo" autoplay muted playsinline></video>
       </div>
-    </div>
 
-    <div class="call-dock">
-      <button class="ctrl-orb" id="btnMic" onclick="toggleMic()" title="Mute/Unmute">🎙️</button>
-      <button class="ctrl-orb" id="btnCam" onclick="toggleCam()" title="Camera On/Off">📷</button>
-      <button class="ctrl-orb end" onclick="endQuantumCall(true)" title="End & Close">📵</button>
-    </div>
-  </section>
+      <!-- AUDIO WAVEFORM EQUALIZER -->
+      <div class="eq-strip" id="eqStrip"></div>
+
+      <div class="p2p-controls">
+        <div class="room-row">
+          <input class="room-input" id="roomCode" value="mayank-janvi-77" placeholder="Frequency Key" />
+        </div>
+        <div class="call-btns">
+          <button class="hud-btn pink" onclick="startQuantumCall(true)">📹 VIDEO</button>
+          <button class="hud-btn" onclick="startQuantumCall(false)">📞 VOICE</button>
+          <button class="hud-btn" id="btnMic" onclick="toggleMic()">🎙️ MIC</button>
+          <button class="hud-btn end" onclick="endQuantumCall()">📵 END</button>
+        </div>
+      </div>
+
+      <div class="node-box">
+        <div class="sub-header" style="margin-bottom:4px;"><span>SYNAPTIC NODE MESH</span><span>ACTIVE</span></div>
+        <svg viewBox="0 0 260 65" style="width:100%;height:65px;">
+          <line x1="25" y1="32" x2="90" y2="14" stroke="#00f0ff" stroke-width="1"/>
+          <line x1="25" y1="32" x2="90" y2="52" stroke="#ff1e7a" stroke-width="1"/>
+          <line x1="90" y1="14" x2="175" y2="32" stroke="#00f0ff" stroke-width="1"/>
+          <line x1="90" y1="52" x2="175" y2="32" stroke="#00f0ff" stroke-width="1"/>
+          <line x1="175" y1="32" x2="235" y2="20" stroke="#ff1e7a" stroke-width="1"/>
+          <circle cx="25" cy="32" r="4" fill="#00f0ff"/>
+          <circle cx="90" cy="14" r="4" fill="#ff1e7a"/>
+          <circle cx="90" cy="52" r="4" fill="#00f0ff"/>
+          <circle cx="175" cy="32" r="5" fill="#00f0ff"/>
+          <circle cx="235" cy="20" r="4" fill="#ff1e7a"/>
+        </svg>
+      </div>
+    </aside>
+
+  </div>
 
   <script>
-    let localStream = null;
-    let peerConn = null;
-    let sigWs = null;
-    let micEnabled = true;
-    let camEnabled = true;
+    // Populate Audio Equalizer Bars
+    const eq = document.getElementById("eqStrip");
+    for (let i = 0; i < 36; i++) {
+      const b = document.createElement("div");
+      b.className = "eq-bar";
+      b.style.animationDelay = (i * 0.06) + "s";
+      eq.appendChild(b);
+    }
 
-    const rtcConfig = {
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" }
-      ]
-    };
+    // Live Clock
+    setInterval(() => {
+      document.getElementById("hudClock").textContent = new Date().toLocaleTimeString();
+    }, 1000);
 
-    // PANIC LOCK ON ESCAPE KEY
+    // Panic Lock on ESC
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") triggerPanic();
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "v") openSecretCall();
     });
 
     function triggerPanic() {
-      endQuantumCall(false);
-      document.getElementById("callHud").style.display = "none";
+      endQuantumCall();
       document.getElementById("jeeDecoy").style.display = "block";
     }
 
-    function exitDecoy() {
-      document.getElementById("jeeDecoy").style.display = "none";
-    }
-
-    function openSecretCall() {
-      document.getElementById("callHud").style.display = "flex";
-    }
-
-    // AUTO-OPEN SECRET CALL IF EMBEDDED FROM F.R.I.D.A.Y. WITH ?quantum=1
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("quantum") === "1") {
-      if (urlParams.get("room")) {
-        document.getElementById("roomCode").value = urlParams.get("room");
-      }
-      openSecretCall();
+    // Auto-fill room if opened from F.R.I.D.A.Y.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("room")) {
+      document.getElementById("roomCode").value = params.get("room");
     }
 
     async function askAlpha() {
       const inp = document.getElementById("aiPrompt");
       const q = inp.value.trim();
       if (!q) return;
-
-      // Secret text command inside AI box also opens call!
-      if (q.toLowerCase() === "/quantum" || q.toLowerCase() === "/call") {
-        inp.value = "";
-        openSecretCall();
-        return;
-      }
-
       inp.value = "";
-      appendCard("user", "YOU", q);
-      const loadingId = "load-" + Date.now();
-      appendCard("bot", "⚡ A.L.P.H.A.", "Computing...", loadingId);
+      appendNode("user", "USER_QUERY", q);
+      const id = "m-" + Date.now();
+      appendNode("bot", "A.L.P.H.A. // PROCESSING", "Computing neural response...", id);
 
       try {
         const res = await fetch("/api/ask", {
@@ -325,39 +377,38 @@
           body: JSON.stringify({ prompt: q })
         });
         const data = await res.json();
-        document.getElementById(loadingId).innerHTML = `<span class="ai-tag">⚡ A.L.P.H.A. NEURAL ENGINE</span>${escapeHtml(data.reply)}`;
+        document.getElementById(id).innerHTML = `<div class="msg-meta">[${new Date().toLocaleTimeString()}] A.L.P.H.A.</div>${escapeHtml(data.reply)}`;
       } catch (e) {
-        document.getElementById(loadingId).textContent = "Connection error.";
+        document.getElementById(id).textContent = "Core link interrupted.";
       }
     }
 
-    function appendCard(cls, tag, text, id = "") {
-      const stream = document.getElementById("aiStream");
+    function appendNode(cls, tag, text, id = "") {
+      const box = document.getElementById("aiStream");
       const div = document.createElement("div");
-      div.className = "ai-card " + cls;
+      div.className = "msg-node " + cls;
       if (id) div.id = id;
-      div.innerHTML = `<span class="ai-tag">${tag}</span>${escapeHtml(text)}`;
-      stream.appendChild(div);
-      stream.scrollTop = stream.scrollHeight;
+      div.innerHTML = `<div class="msg-meta">[${new Date().toLocaleTimeString()}] ${tag}</div>${escapeHtml(text)}`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
     }
 
     function escapeHtml(s) {
       return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
+    // WebRTC P2P Video & Voice Call Engine
+    let localStream = null, peerConn = null, sigWs = null, micOn = true;
+    const rtcCfg = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+
     async function startQuantumCall(withVideo) {
       const room = document.getElementById("roomCode").value.trim() || "mayank-janvi-77";
-      document.getElementById("callStatus").textContent = "INITIALIZING MEDIA...";
-
+      document.getElementById("callStatus").textContent = "LINKING...";
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
         document.getElementById("localVideo").srcObject = localStream;
-        camEnabled = withVideo;
-        micEnabled = true;
-        document.getElementById("btnCam").classList.toggle("off", !withVideo);
-        document.getElementById("btnMic").classList.remove("off");
-      } catch (err) {
-        document.getElementById("callStatus").textContent = "MIC/CAM PERMISSION DENIED";
+      } catch (e) {
+        document.getElementById("callStatus").textContent = "CAM/MIC BLOCKED";
         return;
       }
 
@@ -366,91 +417,65 @@
       sigWs = new WebSocket(`${proto}//${location.host}/ws/call/${encodeURIComponent(room)}`);
 
       sigWs.onopen = () => {
-        document.getElementById("callStatus").textContent = "WAITING FOR PARTNER...";
-        document.getElementById("radarText").textContent = `Frequency [${room}] Active — Waiting for Partner to Join...`;
+        document.getElementById("callStatus").textContent = "FREQ OPEN";
+        document.getElementById("radarText").textContent = `WAITING ON [${room}]...`;
       };
 
-      sigWs.onmessage = async (event) => {
-        const msg = JSON.parse(event.data);
-
+      sigWs.onmessage = async (ev) => {
+        const msg = JSON.parse(ev.data);
         if (msg.type === "peer_joined") {
-          await setupPeerConnection();
+          await initPeer();
           const offer = await peerConn.createOffer();
           await peerConn.setLocalDescription(offer);
           sigWs.send(JSON.stringify({ type: "offer", sdp: offer }));
         } else if (msg.type === "offer") {
-          await setupPeerConnection();
+          await initPeer();
           await peerConn.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-          const answer = await peerConn.createAnswer();
-          await peerConn.setLocalDescription(answer);
-          sigWs.send(JSON.stringify({ type: "answer", sdp: answer }));
-        } else if (msg.type === "answer") {
-          if (peerConn) {
-            await peerConn.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-          }
-        } else if (msg.type === "ice") {
-          if (peerConn && msg.candidate) {
-            try { await peerConn.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch (e) {}
-          }
+          const ans = await peerConn.createAnswer();
+          await peerConn.setLocalDescription(ans);
+          sigWs.send(JSON.stringify({ type: "answer", sdp: ans }));
+        } else if (msg.type === "answer" && peerConn) {
+          await peerConn.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+        } else if (msg.type === "ice" && peerConn && msg.candidate) {
+          try { await peerConn.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch (e) {}
         } else if (msg.type === "peer_left") {
-          document.getElementById("callStatus").textContent = "PARTNER DISCONNECTED";
-          document.getElementById("remotePlaceholder").style.display = "block";
-          document.getElementById("radarText").textContent = "Partner left the frequency.";
+          document.getElementById("callStatus").textContent = "DISCONNECTED";
+          document.getElementById("holoOverlay").style.display = "flex";
         }
       };
     }
 
-    async function setupPeerConnection() {
+    async function initPeer() {
       if (peerConn) peerConn.close();
-      peerConn = new RTCPeerConnection(rtcConfig);
-
-      localStream.getTracks().forEach(track => peerConn.addTrack(track, localStream));
-
-      peerConn.ontrack = (event) => {
-        document.getElementById("remoteVideo").srcObject = event.streams[0];
-        document.getElementById("remotePlaceholder").style.display = "none";
-        document.getElementById("callStatus").textContent = "🔒 ENCRYPTED LIVE";
+      peerConn = new RTCPeerConnection(rtcCfg);
+      localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
+      peerConn.ontrack = (e) => {
+        document.getElementById("remoteVideo").srcObject = e.streams[0];
+        document.getElementById("holoOverlay").style.display = "none";
+        document.getElementById("callStatus").textContent = "🔒 LIVE P2P";
       };
-
-      peerConn.onicecandidate = (event) => {
-        if (event.candidate && sigWs && sigWs.readyState === WebSocket.OPEN) {
-          sigWs.send(JSON.stringify({ type: "ice", candidate: event.candidate }));
+      peerConn.onicecandidate = (e) => {
+        if (e.candidate && sigWs && sigWs.readyState === WebSocket.OPEN) {
+          sigWs.send(JSON.stringify({ type: "ice", candidate: e.candidate }));
         }
       };
     }
 
     function toggleMic() {
       if (!localStream) return;
-      micEnabled = !micEnabled;
-      localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
-      document.getElementById("btnMic").classList.toggle("off", !micEnabled);
+      micOn = !micOn;
+      localStream.getAudioTracks().forEach(t => t.enabled = micOn);
+      document.getElementById("btnMic").textContent = micOn ? "🎙️ MIC" : "🔇 MUTED";
     }
 
-    function toggleCam() {
-      if (!localStream) return;
-      camEnabled = !camEnabled;
-      localStream.getVideoTracks().forEach(t => t.enabled = camEnabled);
-      document.getElementById("btnCam").classList.toggle("off", !camEnabled);
-    }
-
-    function endQuantumCall(closeHud) {
-      if (localStream) {
-        localStream.getTracks().forEach(t => t.stop());
-        localStream = null;
-      }
-      if (peerConn) {
-        peerConn.close();
-        peerConn = null;
-      }
-      if (sigWs) {
-        sigWs.close();
-        sigWs = null;
-      }
+    function endQuantumCall() {
+      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+      if (peerConn) { peerConn.close(); peerConn = null; }
+      if (sigWs) { sigWs.close(); sigWs = null; }
       document.getElementById("remoteVideo").srcObject = null;
       document.getElementById("localVideo").srcObject = null;
-      document.getElementById("remotePlaceholder").style.display = "block";
+      document.getElementById("holoOverlay").style.display = "flex";
       document.getElementById("callStatus").textContent = "STANDBY";
-      if (closeHud) document.getElementById("callHud").style.display = "none";
     }
   </script>
 </body>
