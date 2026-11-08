@@ -4,14 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>A.L.P.H.A. // Neural Computation & Quantum HUD</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/alpha_logo.svg" />
+  <meta name="theme-color" content="#00f0ff" />
   <style>
     :root {
       --bg-void: #02060d;
-      --panel-bg: rgba(4, 14, 26, 0.84);
+      --panel-bg: rgba(4, 14, 26, 0.88);
       --cyan: #00f0ff;
-      --cyan-dim: rgba(0, 240, 255, 0.22);
+      --cyan-dim: rgba(0, 240, 255, 0.24);
       --pink: #ff1e7a;
-      --pink-dim: rgba(255, 30, 122, 0.25);
       --text-main: #d8f8ff;
       --text-dim: #5c8a9e;
     }
@@ -22,14 +24,14 @@
         radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.07) 0%, transparent 70%),
         linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
-      background-size: 100% 100%, 28px 28px, 28px 28px;
+      background-size: 100% 100%, 26px 26px, 26px 26px;
       color: var(--text-main);
       height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding: 10px;
-      gap: 10px;
+      padding: 8px;
+      gap: 8px;
     }
 
     /* PANIC JEE DECOY */
@@ -40,75 +42,97 @@
     .jee-decoy h1 { font-size: 20px; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; margin-bottom: 16px; }
     .jee-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
 
+    /* DEVICE INSTALL GATE MODAL */
+    .install-gate {
+      display: none; position: fixed; inset: 0; background: rgba(2, 6, 13, 0.94);
+      z-index: 5000; justify-content: center; align-items: center; padding: 20px;
+      backdrop-filter: blur(12px);
+    }
+    .install-card {
+      max-width: 440px; width: 100%; background: #04101f; border: 1px solid var(--cyan);
+      padding: 26px; text-align: center; box-shadow: 0 0 40px rgba(0, 240, 255, 0.25);
+    }
+    .install-card h2 { color: var(--cyan); letter-spacing: 3px; font-size: 18px; margin: 12px 0 8px; }
+    .install-card p { font-size: 12.5px; color: #94a3b8; line-height: 1.6; margin-bottom: 18px; }
+    .btn-install-now {
+      width: 100%; padding: 12px; background: linear-gradient(90deg, #00f0ff, #ff1e7a);
+      border: none; color: #02060d; font-weight: 900; font-size: 13px; letter-spacing: 1.5px;
+      cursor: pointer; margin-bottom: 10px;
+    }
+    .btn-skip-install {
+      background: transparent; border: 1px solid var(--cyan-dim); color: var(--text-dim);
+      padding: 7px 14px; font-size: 11px; cursor: pointer;
+    }
+
     /* HUD FRAME CORNERS */
     .hud-box {
       background: var(--panel-bg);
       border: 1px solid var(--cyan-dim);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.08), inset 0 0 18px rgba(0, 240, 255, 0.04);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.08), inset 0 0 14px rgba(0, 240, 255, 0.04);
       position: relative;
-      backdrop-filter: blur(10px);
     }
     .hud-box::before, .hud-box::after {
-      content: ""; position: absolute; width: 12px; height: 12px; border: 2px solid var(--cyan); pointer-events: none;
+      content: ""; position: absolute; width: 10px; height: 10px; border: 2px solid var(--cyan); pointer-events: none;
     }
     .hud-box::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
     .hud-box::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
     /* TOP TELEMETRY BAR */
     .top-bar {
-      height: 68px; display: flex; justify-content: space-between; align-items: center; padding: 0 18px;
+      height: 56px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 14px;
     }
-    .logo-cluster { display: flex; align-items: center; gap: 16px; }
-    .reactor-svg { width: 52px; height: 52px; animation: spinSlow 14s linear infinite; }
+    .logo-cluster { display: flex; align-items: center; gap: 12px; }
+    .reactor-svg { width: 40px; height: 40px; animation: spinSlow 14s linear infinite; }
     @keyframes spinSlow { 100% { transform: rotate(360deg); } }
-    @keyframes spinRev { 100% { transform: rotate(-360deg); } }
     .alpha-banner {
-      border: 1px solid var(--cyan); padding: 4px 16px; background: rgba(0, 240, 255, 0.08);
-      box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+      border: 1px solid var(--cyan); padding: 3px 12px; background: rgba(0, 240, 255, 0.08);
     }
-    .alpha-banner h1 { font-size: 24px; letter-spacing: 6px; color: #fff; text-shadow: 0 0 10px var(--cyan); }
-    .top-metrics { display: flex; align-items: center; gap: 14px; }
+    .alpha-banner h1 { font-size: 20px; letter-spacing: 5px; color: #fff; text-shadow: 0 0 10px var(--cyan); }
+    .top-metrics { display: flex; align-items: center; gap: 10px; }
     .metric-pill {
-      border: 1px solid var(--cyan-dim); padding: 6px 12px; text-align: center; font-size: 11px;
+      border: 1px solid var(--cyan-dim); padding: 4px 10px; text-align: center; font-size: 10px;
     }
-    .metric-pill strong { display: block; font-size: 14px; color: var(--cyan); }
+    .metric-pill strong { display: block; font-size: 12px; color: var(--cyan); }
+    .install-top-btn {
+      background: rgba(0, 240, 255, 0.16); border: 1px solid var(--cyan); color: var(--cyan);
+      padding: 6px 10px; font-weight: bold; cursor: pointer; font-size: 11px;
+    }
     .panic-trigger {
       background: rgba(255, 30, 122, 0.18); border: 1px solid var(--pink); color: #ff8ab8;
-      padding: 8px 14px; font-weight: bold; cursor: pointer; font-size: 12px; letter-spacing: 1px;
+      padding: 6px 11px; font-weight: bold; cursor: pointer; font-size: 11px;
     }
 
     /* 3-COLUMN IRON-MAN HUD GRID */
     .hud-grid {
-      flex: 1; display: grid; grid-template-columns: 260px 1fr 370px; gap: 10px; overflow: hidden;
+      flex: 1; min-height: 0; display: grid; grid-template-columns: 230px 1fr 340px; gap: 8px;
     }
 
     /* LEFT TELEMETRY COLUMN */
-    .col-left { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+    .col-left { display: flex; flex-direction: column; gap: 8px; padding: 10px; min-height: 0; }
     .sub-header {
-      font-size: 11px; letter-spacing: 2px; color: var(--cyan); border-bottom: 1px solid var(--cyan-dim);
-      padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between;
+      font-size: 10px; letter-spacing: 1.5px; color: var(--cyan); border-bottom: 1px solid var(--cyan-dim);
+      padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;
     }
-    .gauge-row { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
+    .gauge-row { display: flex; justify-content: space-around; align-items: center; padding: 4px 0; }
     .circle-gauge {
-      width: 84px; height: 84px; border-radius: 50%; border: 2px dashed var(--cyan);
+      width: 72px; height: 72px; border-radius: 50%; border: 2px dashed var(--cyan);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.2); position: relative;
     }
-    .circle-gauge span { font-size: 15px; font-weight: bold; color: #fff; }
-    .circle-gauge small { font-size: 9px; color: var(--text-dim); }
+    .circle-gauge span { font-size: 13px; font-weight: bold; color: #fff; }
+    .circle-gauge small { font-size: 8px; color: var(--text-dim); }
     .hex-log {
-      flex: 1; font-size: 10px; color: #38bdf8; line-height: 1.5; overflow: hidden; opacity: 0.85;
+      flex: 1; font-size: 9.5px; color: #38bdf8; line-height: 1.45; overflow: hidden;
       background: rgba(0, 10, 20, 0.6); padding: 8px; border: 1px solid rgba(0, 240, 255, 0.12);
     }
 
     /* CENTER AI COMPUTATION CONSOLE */
-    .col-center { display: flex; flex-direction: column; padding: 12px; gap: 10px; overflow: hidden; }
+    .col-center { display: flex; flex-direction: column; padding: 10px; gap: 8px; min-height: 0; }
     .chat-console {
-      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+      flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
       padding: 10px; background: rgba(1, 8, 16, 0.75); border: 1px solid var(--cyan-dim);
     }
     .msg-node {
-      max-width: 85%; padding: 10px 14px; font-size: 13px; line-height: 1.55; white-space: pre-wrap;
+      max-width: 86%; padding: 8px 12px; font-size: 12.5px; line-height: 1.45; white-space: pre-wrap;
     }
     .msg-node.bot {
       align-self: flex-start; border-left: 3px solid var(--cyan);
@@ -118,84 +142,72 @@
       align-self: flex-end; border-right: 3px solid var(--pink);
       background: rgba(255, 30, 122, 0.14); color: #ffe4f0;
     }
-    .msg-meta { font-size: 10px; color: var(--cyan); margin-bottom: 4px; letter-spacing: 1px; }
+    .msg-meta { font-size: 9.5px; color: var(--cyan); margin-bottom: 3px; }
 
-    /* DATA TRANSMISSION & PINK PROGRESS BARS */
-    .telemetry-bars { padding: 8px 10px; background: rgba(0, 12, 24, 0.7); border: 1px solid var(--cyan-dim); }
-    .prog-label { font-size: 10px; color: var(--pink); letter-spacing: 1.5px; margin-bottom: 4px; display: flex; justify-content: space-between; }
-    .prog-track { height: 8px; background: rgba(255, 30, 122, 0.15); border: 1px solid var(--pink); margin-bottom: 8px; overflow: hidden; }
+    .telemetry-bars { padding: 6px 8px; background: rgba(0, 12, 24, 0.7); border: 1px solid var(--cyan-dim); flex-shrink: 0; }
+    .prog-label { font-size: 9.5px; color: var(--pink); letter-spacing: 1px; margin-bottom: 3px; display: flex; justify-content: space-between; }
+    .prog-track { height: 6px; background: rgba(255, 30, 122, 0.15); border: 1px solid var(--pink); margin-bottom: 5px; overflow: hidden; }
     .prog-fill {
       height: 100%; width: 72%; background: linear-gradient(90deg, var(--pink), #ff7eb3);
-      box-shadow: 0 0 12px var(--pink); animation: pulseBar 2.5s infinite alternate;
+      animation: pulseBar 2.5s infinite alternate;
     }
     @keyframes pulseBar { 0% { width: 48%; } 100% { width: 92%; } }
 
-    .console-input-row { display: flex; gap: 8px; }
+    .console-input-row { display: flex; gap: 8px; flex-shrink: 0; }
     .console-input {
       flex: 1; background: rgba(0, 18, 34, 0.9); border: 1px solid var(--cyan); color: #fff;
-      padding: 10px 12px; font-size: 13px; outline: none;
+      padding: 8px 12px; font-size: 12.5px; outline: none;
     }
     .console-btn {
-      background: var(--cyan); color: #02060d; border: none; padding: 0 20px; font-weight: 900;
-      cursor: pointer; letter-spacing: 1px;
+      background: var(--cyan); color: #02060d; border: none; padding: 0 18px; font-weight: 900;
+      cursor: pointer; font-size: 12px;
     }
 
     /* RIGHT P2P ENCRYPTED VIDEO CALL HUD */
-    .col-right { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+    .col-right { display: flex; flex-direction: column; gap: 7px; padding: 10px; min-height: 0; }
     .video-window {
-      height: 270px; border: 1px solid var(--cyan); background: #01050a; position: relative;
+      flex: 1; min-height: 160px; border: 1px solid var(--cyan); background: #01050a; position: relative;
       overflow: hidden; display: flex; align-items: center; justify-content: center;
     }
     #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
     .holo-overlay {
       position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
       justify-content: center; text-align: center; pointer-events: none;
-      background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 75%);
     }
     .holo-reticle {
-      width: 118px; height: 118px; border-radius: 50%; border: 2px solid var(--cyan);
-      display: flex; align-items: center; justify-content: center; font-size: 34px;
-      box-shadow: 0 0 24px rgba(0, 240, 255, 0.35), inset 0 0 20px rgba(0, 240, 255, 0.25);
+      width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center; font-size: 26px;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
       animation: spinSlow 10s linear infinite;
     }
     .secure-badge {
-      margin-top: 10px; font-size: 10px; padding: 3px 10px; border: 1px solid var(--cyan);
-      background: rgba(0, 240, 255, 0.12); color: var(--cyan); letter-spacing: 1.5px;
+      margin-top: 8px; font-size: 9.5px; padding: 3px 8px; border: 1px solid var(--cyan);
+      background: rgba(0, 240, 255, 0.12); color: var(--cyan);
     }
     #localVideo {
-      position: absolute; bottom: 8px; right: 8px; width: 88px; height: 115px;
+      position: absolute; bottom: 6px; right: 6px; width: 76px; height: 98px;
       border: 1px solid var(--pink); object-fit: cover; background: #000; transform: scaleX(-1);
     }
 
-    /* AUDIO EQUALIZER & CALL CONTROLS */
     .eq-strip {
-      display: flex; align-items: center; justify-content: center; gap: 4px; height: 34px;
-      background: rgba(0, 15, 28, 0.8); border: 1px solid var(--cyan-dim); padding: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 3px; height: 26px; flex-shrink: 0;
+      background: rgba(0, 15, 28, 0.8); border: 1px solid var(--cyan-dim); padding: 3px;
     }
-    .eq-bar {
-      width: 3px; background: var(--cyan); animation: eqWave 0.9s infinite ease-in-out alternate;
-    }
-    @keyframes eqWave { 0% { height: 4px; } 100% { height: 24px; background: var(--pink); } }
+    .eq-bar { width: 3px; background: var(--cyan); animation: eqWave 0.9s infinite ease-in-out alternate; }
+    @keyframes eqWave { 0% { height: 4px; } 100% { height: 18px; background: var(--pink); } }
 
-    .p2p-controls { display: flex; flex-direction: column; gap: 8px; }
-    .room-row { display: flex; gap: 6px; }
+    .p2p-controls { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
     .room-input {
-      flex: 1; background: rgba(0, 15, 28, 0.9); border: 1px solid var(--pink); color: #fff;
-      padding: 7px 10px; font-size: 12px; outline: none;
+      width: 100%; background: rgba(0, 15, 28, 0.9); border: 1px solid var(--pink); color: #fff;
+      padding: 6px 10px; font-size: 11.5px; outline: none;
     }
-    .call-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .call-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
     .hud-btn {
-      padding: 8px 4px; font-size: 11px; font-weight: bold; border: 1px solid var(--cyan);
+      padding: 7px 2px; font-size: 10.5px; font-weight: bold; border: 1px solid var(--cyan);
       background: rgba(0, 240, 255, 0.1); color: var(--cyan); cursor: pointer; text-align: center;
     }
     .hud-btn.pink { border-color: var(--pink); background: rgba(255, 30, 122, 0.2); color: #ff8ab8; }
     .hud-btn.end { border-color: #f43f5e; background: #e11d48; color: #fff; }
-
-    /* NEURAL NODE GRAPH FOOTER */
-    .node-box {
-      flex: 1; border: 1px solid var(--cyan-dim); background: rgba(0, 10, 20, 0.6);
-      padding: 8px; display: flex; flex-direction: column; justify-content: space-between;
-    }
 
     @media (max-width: 980px) {
       body { height: auto; overflow-y: auto; }
@@ -213,59 +225,65 @@
     <button onclick="document.getElementById('jeeDecoy').style.display='none'" style="padding:8px 14px;cursor:pointer;">Reload Notes</button>
   </div>
 
+  <!-- DEVICE INSTALL PROMPT MODAL -->
+  <div class="install-gate" id="installGate">
+    <div class="install-card">
+      <img src="/alpha_logo.svg" style="width:68px;height:68px;" alt="ALPHA Core" />
+      <h2>INSTALL A.L.P.H.A. CORE</h2>
+      <p>Install <strong>QuantumLab (A.L.P.H.A. HUD)</strong> onto your laptop/device for hardware-accelerated P2P Video/Voice Link & instant desktop launch.</p>
+      <button class="btn-install-now" id="gateInstallBtn" onclick="triggerDeviceInstall()">⬇ INSTALL ON LAPTOP NOW</button>
+      <button class="btn-skip-install" onclick="document.getElementById('installGate').style.display='none'">CONTINUE IN HUD MODE</button>
+    </div>
+  </div>
+
   <!-- TOP TELEMETRY HEADER -->
   <header class="hud-box top-bar">
     <div class="logo-cluster">
-      <svg class="reactor-svg" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="44" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="14 6"/>
-        <circle cx="50" cy="50" r="32" fill="none" stroke="#ff1e7a" stroke-width="2" stroke-dasharray="8 8"/>
-        <circle cx="50" cy="50" r="14" fill="rgba(0,240,255,0.25)" stroke="#00f0ff" stroke-width="2"/>
-      </svg>
+      <img src="/alpha_logo.svg" class="reactor-svg" alt="ALPHA" />
       <div class="alpha-banner">
         <h1>A.L.P.H.A.</h1>
       </div>
-      <div style="font-size:10px;color:var(--text-dim);line-height:1.4;">
-        SYSTEM TECHNICAL CORE<br>QUANTUM ENCRYPTION: ACTIVE
+      <div style="font-size:9.5px;color:var(--text-dim);line-height:1.3;">
+        QUANTUM COMPUTATION HUD<br>P2P ENCRYPTION: READY
       </div>
     </div>
 
     <div class="top-metrics">
       <div class="metric-pill"><span>NEURAL LOAD</span><strong>82%</strong></div>
-      <div class="metric-pill"><span>SYNC LINK</span><strong>99.4%</strong></div>
       <div class="metric-pill"><span id="hudClock">00:00:00</span><strong style="color:var(--pink);">LIVE IST</strong></div>
+      <button class="install-top-btn" id="topInstallBtn" onclick="triggerDeviceInstall()">⬇ INSTALL APP</button>
       <button class="panic-trigger" onclick="triggerPanic()">🔒 ESC HIDE</button>
     </div>
   </header>
 
   <!-- MAIN 3-COLUMN HUD -->
   <div class="hud-grid">
-
-    <!-- LEFT COLUMN: TELEMETRY & HEX STREAM -->
+    <!-- LEFT COLUMN -->
     <aside class="hud-box col-left">
       <div class="sub-header"><span>CORE DIAGNOSTICS</span><span>v4.8</span></div>
       <div class="gauge-row">
-        <div class="circle-gauge"><span id="upTimer">05:39</span><small>UPTIME</small></div>
+        <div class="circle-gauge"><span>05:39</span><small>UPTIME</small></div>
         <div class="circle-gauge" style="border-color:var(--pink);"><span>295</span><small>GFLOPS</small></div>
       </div>
-      <div class="sub-header"><span>DATA TRANSMISSION STREAM</span><span>HEX</span></div>
-      <div class="hex-log" id="hexLog">
+      <div class="sub-header"><span>DATA STREAM</span><span>HEX</span></div>
+      <div class="hex-log">
         0101001 0100101 0010111 0010000<br>
         [SYS] NEURAL MATRIX INITIALIZED<br>
         [NET] P2P STUN RELAY VERIFIED<br>
         [SEC] AES-256 QUANTUM HANDSHAKE<br>
         0110101 0101011 0001010 1101010<br>
         [AI] GPT-OSS-120B CASCADE READY<br>
-        [HUD] HOLOGRAPHIC LAYER LOCKED<br>
+        [PWA] STANDALONE CORE ARMED<br>
         1010011 0011101 0101100 0111011
       </div>
     </aside>
 
-    <!-- CENTER COLUMN: AI COMPUTATION CHAT CONSOLE -->
+    <!-- CENTER COLUMN -->
     <main class="hud-box col-center">
       <div class="sub-header"><span>AI COMPUTATION CHAT CONSOLE</span><span style="color:var(--pink);">● ONLINE</span></div>
       <div class="chat-console" id="aiStream">
         <div class="msg-node bot">
-          <div class="msg-meta">[17:22:06] A.L.P.H.A. NEURAL CORE</div>
+          <div class="msg-meta">[SYSTEM] A.L.P.H.A. NEURAL CORE</div>
           System online. Enter Physics, Mathematics, or Code computation query below.
         </div>
       </div>
@@ -283,7 +301,7 @@
       </div>
     </main>
 
-    <!-- RIGHT COLUMN: ENCRYPTED P2P VIDEO CALL HUD -->
+    <!-- RIGHT COLUMN -->
     <aside class="hud-box col-right">
       <div class="sub-header"><span>ENCRYPTED P2P VIDEO CALL</span><span id="callStatus" style="color:var(--pink);">STANDBY</span></div>
 
@@ -296,13 +314,10 @@
         <video id="localVideo" autoplay muted playsinline></video>
       </div>
 
-      <!-- AUDIO WAVEFORM EQUALIZER -->
       <div class="eq-strip" id="eqStrip"></div>
 
       <div class="p2p-controls">
-        <div class="room-row">
-          <input class="room-input" id="roomCode" value="mayank-janvi-77" placeholder="Frequency Key" />
-        </div>
+        <input class="room-input" id="roomCode" value="aris-sync-01" placeholder="Frequency Key" />
         <div class="call-btns">
           <button class="hud-btn pink" onclick="startQuantumCall(true)">📹 VIDEO</button>
           <button class="hud-btn" onclick="startQuantumCall(false)">📞 VOICE</button>
@@ -310,42 +325,56 @@
           <button class="hud-btn end" onclick="endQuantumCall()">📵 END</button>
         </div>
       </div>
-
-      <div class="node-box">
-        <div class="sub-header" style="margin-bottom:4px;"><span>SYNAPTIC NODE MESH</span><span>ACTIVE</span></div>
-        <svg viewBox="0 0 260 65" style="width:100%;height:65px;">
-          <line x1="25" y1="32" x2="90" y2="14" stroke="#00f0ff" stroke-width="1"/>
-          <line x1="25" y1="32" x2="90" y2="52" stroke="#ff1e7a" stroke-width="1"/>
-          <line x1="90" y1="14" x2="175" y2="32" stroke="#00f0ff" stroke-width="1"/>
-          <line x1="90" y1="52" x2="175" y2="32" stroke="#00f0ff" stroke-width="1"/>
-          <line x1="175" y1="32" x2="235" y2="20" stroke="#ff1e7a" stroke-width="1"/>
-          <circle cx="25" cy="32" r="4" fill="#00f0ff"/>
-          <circle cx="90" cy="14" r="4" fill="#ff1e7a"/>
-          <circle cx="90" cy="52" r="4" fill="#00f0ff"/>
-          <circle cx="175" cy="32" r="5" fill="#00f0ff"/>
-          <circle cx="235" cy="20" r="4" fill="#ff1e7a"/>
-        </svg>
-      </div>
     </aside>
-
   </div>
 
   <script>
-    // Populate Audio Equalizer Bars
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
+    let deferredPrompt = null;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isStandalone) {
+        document.getElementById("installGate").style.display = "flex";
+      }
+    });
+
+    async function triggerDeviceInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          document.getElementById("installGate").style.display = "none";
+          document.getElementById("topInstallBtn").style.display = "none";
+        }
+        deferredPrompt = null;
+      } else {
+        alert("Browser ke address bar mein right side par 'Install QuantumLab' icon par click karke laptop mein install karein!");
+        document.getElementById("installGate").style.display = "none";
+      }
+    }
+
+    if (isStandalone) {
+      document.getElementById("topInstallBtn").style.display = "none";
+    }
+
     const eq = document.getElementById("eqStrip");
-    for (let i = 0; i < 36; i++) {
+    for (let i = 0; i < 32; i++) {
       const b = document.createElement("div");
       b.className = "eq-bar";
       b.style.animationDelay = (i * 0.06) + "s";
       eq.appendChild(b);
     }
 
-    // Live Clock
     setInterval(() => {
       document.getElementById("hudClock").textContent = new Date().toLocaleTimeString();
     }, 1000);
 
-    // Panic Lock on ESC
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") triggerPanic();
     });
@@ -355,10 +384,12 @@
       document.getElementById("jeeDecoy").style.display = "block";
     }
 
-    // Auto-fill room if opened from F.R.I.D.A.Y.
     const params = new URLSearchParams(window.location.search);
     if (params.get("room")) {
       document.getElementById("roomCode").value = params.get("room");
+    }
+    if (params.get("install") === "1" && !isStandalone) {
+      document.getElementById("installGate").style.display = "flex";
     }
 
     async function askAlpha() {
@@ -397,12 +428,11 @@
       return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    // WebRTC P2P Video & Voice Call Engine
     let localStream = null, peerConn = null, sigWs = null, micOn = true;
     const rtcCfg = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
     async function startQuantumCall(withVideo) {
-      const room = document.getElementById("roomCode").value.trim() || "mayank-janvi-77";
+      const room = document.getElementById("roomCode").value.trim() || "aris-sync-01";
       document.getElementById("callStatus").textContent = "LINKING...";
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
